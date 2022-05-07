@@ -55,6 +55,12 @@ async function run() {
       const result = await bicycleCollection.updateOne(filter, updatedDoc, options);
       res.send(result)
     });
+    // add product api
+    app.post('/product', async(req, res)=>{
+      const newProduct = req.body;
+      const result = await bicycleCollection.insertOne(newProduct);
+      res.send(result)
+    })
     // Delete product from db
     app.delete('/product/:id', async(req, res)=>{
       const id = req.params.id;
