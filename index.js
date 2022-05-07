@@ -29,6 +29,7 @@ async function run() {
       const products = await cursor.toArray();
       res.send(products);
     });
+
     // product api
     app.get("/product/:id", async (req, res) => {
       const id = req.params.id;
@@ -36,6 +37,16 @@ async function run() {
       const product = await bicycleCollection.findOne(query);
       res.send(product);
     });
+
+    // find my products
+    app.get("/product", async(req, res)=>{
+      const email = req.query.email;
+      const query = {email: email}
+      const filter =  bicycleCollection.find(query);
+      const myProducts = await filter.toArray();
+      res.send(myProducts)
+    });
+
     // put updated product
     app.put("/product/:id", async (req, res) => {
       const id = req.params.id;
@@ -43,31 +54,37 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updatedDoc = {
-          $set: {
-            picture: updatedProduct.picture,
-            name: updatedProduct.name,
-            about: updatedProduct.about,
-            price: updatedProduct.price,
-            quantity: updatedProduct.quantity,
-            supplierName: updatedProduct.supplierName
-          }
-      }
-      const result = await bicycleCollection.updateOne(filter, updatedDoc, options);
-      res.send(result)
+        $set: {
+          picture: updatedProduct.picture,
+          name: updatedProduct.name,
+          about: updatedProduct.about,
+          price: updatedProduct.price,
+          quantity: updatedProduct.quantity,
+          supplierName: updatedProduct.supplierName,
+        },
+      };
+      const result = await bicycleCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
     });
+
     // add product api
-    app.post('/product', async(req, res)=>{
+    app.post("/product", async (req, res) => {
       const newProduct = req.body;
       const result = await bicycleCollection.insertOne(newProduct);
-      res.send(result)
-    })
+      res.send(result);
+    });
+    
     // Delete product from db
-    app.delete('/product/:id', async(req, res)=>{
+    app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: ObjectId(id)};
+      const query = { _id: ObjectId(id) };
       const result = await bicycleCollection.deleteOne(query);
-      res.send(result)
-    })
+      res.send(result);
+    });
   } finally {
   }
 }
