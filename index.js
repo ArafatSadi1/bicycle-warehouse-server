@@ -66,7 +66,7 @@ async function run() {
     // add myProduct api
     app.post("/myProducts", async (req, res) => {
       const newProduct = req.body;
-      console.log(newProduct)
+      console.log(newProduct);
       const result = await myProductsCollection.insertOne(newProduct);
       res.send(result);
     });
@@ -78,6 +78,22 @@ async function run() {
       const filter = myProductsCollection.find(query);
       const myProducts = await filter.toArray();
       res.send(myProducts);
+    });
+
+    // myProduct api
+    app.get("/myProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const product = await myProductsCollection.findOne(query);
+      res.send(product);
+    });
+
+    // Delete myProducts from db
+    app.delete("/myProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await myProductsCollection.deleteOne(query);
+      res.send(result);
     });
 
     // Delete product from db
