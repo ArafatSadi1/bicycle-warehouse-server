@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const res = require("express/lib/response");
+// const res = require("express/lib/response");
 require("dotenv").config();
 
 // middleware
@@ -16,7 +17,7 @@ function verifyJWT(req, res, next) {
     return res.status(401).send({ message: "Unauthorized access" });
   }
   const token = authHeader.split(" ")[1];
-  console.log(token)
+  console.log(token);
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).send({ message: "Forbidden access" });
@@ -38,6 +39,15 @@ async function run() {
     await client.connect();
     const bicycleCollection = client.db("bicycle").collection("products");
     const myProductsCollection = client.db("bicycle").collection("myProducts");
+
+    // JWT auth
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
+    });
 
     // products api
     app.get("/products", async (req, res) => {
