@@ -21,6 +21,7 @@ async function run() {
   try {
     await client.connect();
     const bicycleCollection = client.db("bicycle").collection("products");
+    const myProductsCollection = client.db("bicycle").collection("myProducts");
 
     // products api
     app.get("/products", async (req, res) => {
@@ -36,15 +37,6 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const product = await bicycleCollection.findOne(query);
       res.send(product);
-    });
-
-    // find my products
-    app.get("/product", async(req, res)=>{
-      const email = req.query.email;
-      const query = {email: email}
-      const filter =  bicycleCollection.find(query);
-      const myProducts = await filter.toArray();
-      res.send(myProducts)
     });
 
     // put updated product
@@ -71,13 +63,23 @@ async function run() {
       res.send(result);
     });
 
-    // add product api
-    app.post("/product", async (req, res) => {
+    // add myProduct api
+    app.post("/myProducts", async (req, res) => {
       const newProduct = req.body;
-      const result = await bicycleCollection.insertOne(newProduct);
+      console.log(newProduct)
+      const result = await myProductsCollection.insertOne(newProduct);
       res.send(result);
     });
-    
+
+    // find myProducts
+    app.get("/myProducts", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const filter = myProductsCollection.find(query);
+      const myProducts = await filter.toArray();
+      res.send(myProducts);
+    });
+
     // Delete product from db
     app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
