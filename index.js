@@ -10,7 +10,6 @@ require("dotenv").config();
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.e9exc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -24,6 +23,14 @@ async function run() {
     const bicycleCollection = client.db("bicycle").collection("products");
     const myProductsCollection = client.db("bicycle").collection("myProducts");
 
+    // JWT auth
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
+    });
 
     // products api
     app.get("/products", async (req, res) => {
@@ -74,11 +81,13 @@ async function run() {
 
     // find myProducts
     app.get("/myProducts", async (req, res) => {
+      const authHeader = req.headers.authorization;
+      console.log(authHeader)
       const email = req.query.email;
-        const query = { email: email };
-        const filter = myProductsCollection.find(query);
-        const myProducts = await filter.toArray();
-        res.send(myProducts);
+      const query = { email: email };
+      const filter = myProductsCollection.find(query);
+      const myProducts = await filter.toArray();
+      res.send(myProducts);
     });
 
     // myProduct api
